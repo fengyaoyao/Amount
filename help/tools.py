@@ -29,24 +29,28 @@ def get_system():
     return platform.system()
 
 # 获取当前目录
+
+
 def get_dir():
 
     return os.getcwd()
 
 # 获取代理IP
+
+
 def get_proxy_ip():
 
     headers = {'Cache-Control': 'no-cache'}
     url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=52375&port=11&lb=1&pb=45&regions='
     get_ip = requests.get(url, headers).text.strip()
-
     if is_json(get_ip):
 
         result_str = json.loads(get_ip)
-        myip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', result_str['msg'])[0]
-        white_proxy_url = 'http://ty-http-d.upupfile.com/index/white/add?neek=tyhttp487901&appkey=3e096aec1eecdba33d44249454053a07&white='
-        response = requests.get(white_proxy_url + myip, headers).text
-        get_ip = requests.get(url, headers).text.strip()
+        if len(result_str['msg']) == 1:
+            myip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', result_str['msg'])[0]
+            white_proxy_url = 'http://ty-http-d.upupfile.com/index/white/add?neek=tyhttp487901&appkey=3e096aec1eecdba33d44249454053a07&white='
+            response = requests.get(white_proxy_url + myip, headers).text
+            get_ip = requests.get(url, headers).text.strip()
 
     match_list = re.findall(r'[0-9]+(?:\.[0-9]+){3}', get_ip)
 
@@ -62,7 +66,6 @@ def set_flow():
 
     return datetime.now().strftime('%Y%m%d%H%M%S%f')
 
-    
 
 # 查找指定文件
 
@@ -154,4 +157,3 @@ def get_move_coordinates(bg_path, front_path):
     result = cv2.matchTemplate(bg, front, cv2.TM_CCOEFF_NORMED)  # 精度最高，速度最慢
     x, y = np.unravel_index(result.argmax(), result.shape)
     return y
-

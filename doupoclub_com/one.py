@@ -10,7 +10,7 @@ from time import sleep
 from selenium import webdriver
 sys.path.append('../')
 from help.config import config_data
-from help.tools import find_file,delete_path,get_mobileconfig_url
+from help.tools import find_file, delete_path, get_mobileconfig_url
 
 
 config = [
@@ -51,27 +51,34 @@ def run(n):
 
     config_dit = q.get()
 
-    if config_dit['proxy_ip'] != None && config_dit['xml'] != None:
-        
+    if config_dit['proxy_ip'] != None & & config_dit['xml'] != None:
+
         proxy_ip = config_dit['deviceName']
         mobileEmulation = {'deviceName': config_dit['deviceName']}
-        prefs = {'download.default_directory': config_dit['downloadPath'],'download.prompt_for_download': False}
+        prefs = {'download.default_directory': config_dit[
+            'downloadPath'], 'download.prompt_for_download': False}
 
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument("--proxy-server=http://" + proxy_ip)
         chrome_options.add_argument('--ignore-certificate-errors')
         chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--safebrowsing-disable-download-protection')
-        chrome_options.add_argument("--safebrowsing-disable-extension-blacklist")
-        chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
+        chrome_options.add_argument(
+            '--safebrowsing-disable-download-protection')
+        chrome_options.add_argument(
+            '--safebrowsing-disable-extension-blacklist')
+        chrome_options.add_experimental_option(
+            'mobileEmulation', mobileEmulation)
         chrome_options.add_experimental_option('prefs', prefs)
-        chrome_options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
+        chrome_options.add_experimental_option(
+            'excludeSwitches', ['enable-logging', 'enable-automation'])
 
         driver = webdriver.Chrome(options=chrome_options)
 
-        driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
-        params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': config_dit['downloadPath']}}
+        driver.command_executor._commands["send_command"] = (
+            "POST", '/session/$sessionId/chromium/send_command')
+        params = {'cmd': 'Page.setDownloadBehavior', 'params': {
+            'behavior': 'allow', 'downloadPath': config_dit['downloadPath']}}
         driver.execute("send_command", params)
 
         try:
@@ -86,7 +93,8 @@ def run(n):
             driver.implicitly_wait(1)
 
             if len(config_dit['localStorage']) == 2:
-                JS = "window.localStorage.setItem('" + config_dit['localStorage'][0] + "','" + config_dit['localStorage'][1] + "');"
+                JS = "window.localStorage.setItem('" + config_dit['localStorage'][
+                    0] + "','" + config_dit['localStorage'][1] + "');"
                 driver.execute_script(JS)
                 driver.refresh()
 
@@ -106,7 +114,8 @@ def run(n):
 
         post_url = ''
         if download_file_name:
-            path_mobileconfig = config_dit['downloadPath'] + '/' + download_file_name
+            path_mobileconfig = config_dit[
+                'downloadPath'] + '/' + download_file_name
             mobileconfig_url = get_mobileconfig_url(path_mobileconfig)
             post_url = mobileconfig_url[0]
 
@@ -120,7 +129,8 @@ def run(n):
 
         try:
             # 发送XML进行签名
-            response = requests.post(post_url, data=config_dit['xml'], headers=headers, proxies=proxies)
+            response = requests.post(post_url, data=config_dit[
+                                     'xml'], headers=headers, proxies=proxies)
             print("响应状态:", response.status_code)
             print('响应地址:', response.url)
 
@@ -132,12 +142,6 @@ def run(n):
             driver.close()
             driver.quit()
             continue
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
