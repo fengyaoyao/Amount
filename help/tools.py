@@ -11,6 +11,7 @@ import cv2
 import json
 import platform
 import shutil
+import random
 
 
 # 判断字符串是否是json
@@ -41,7 +42,7 @@ def get_dir():
 def get_proxy_ip():
 
     headers = {'Cache-Control': 'no-cache'}
-    url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=52375&port=11&lb=1&pb=45&regions='
+    url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=53362&port=11&lb=1&pb=45&regions='
     get_ip = requests.get(url, headers).text.strip()
     if is_json(get_ip):
 
@@ -64,7 +65,7 @@ def get_proxy_ip():
 
 def set_flow():
 
-    return datetime.now().strftime('%Y%m%d%H%M%S%f')
+    return datetime.now().strftime('%Y%m%d%H%M%S%f') +'_'+ str(random.randint(10000,99999))
 
 
 # 查找指定文件

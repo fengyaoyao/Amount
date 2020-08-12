@@ -13,12 +13,9 @@ from help.config import config_data
 from help.tools import find_file, delete_path, get_mobileconfig_url
 
 
-config = [
-    {'url': 'https://yd8.vip/', 'click': '/html/body/div[1]/div/div/a', 'installation': '//*[@id="xzzz"]',
-        'frist_is_iframe': 'False', 'localStorage': ['5ee205a1f1670ischeck', 'true']},
 
-    {'url': 'https://qp911.cc/', 'click': '//*[@id="bgtype2_download"]/section/img[1]', 'installation': '//*[@id="xzzz"]',
-        'frist_is_iframe': 'True', 'localStorage': ['5f218a85bbda7ischeck', 'true']},
+
+config = [
 
     {'url': 'https://26x.com/', 'click': '/html/body/section/div[2]/div[1]/img[2]', 'installation': '//*[@id="xzzz"]',
         'frist_is_iframe': 'True', 'localStorage': ['5ee210d78a135ischeck', 'true']},
@@ -49,11 +46,14 @@ def make_config():
 
 def run(n):
 
-    config_dit = q.get()
+    config_dit = config_data(config) # q.get()
 
-    if config_dit['proxy_ip'] != None & & config_dit['xml'] != None:
+    print('获取队列数据',config_dit)
+    exit()
 
-        proxy_ip = config_dit['deviceName']
+    if config_dit['proxy_ip'] != None and config_dit['xml'] != None :
+
+        proxy_ip = config_dit['proxy_ip']
         mobileEmulation = {'deviceName': config_dit['deviceName']}
         prefs = {'download.default_directory': config_dit[
             'downloadPath'], 'download.prompt_for_download': False}
@@ -101,8 +101,8 @@ def run(n):
             driver.find_element_by_xpath(config_dit['installation']).click()
             driver.implicitly_wait(1)
 
-        except Exception as e:
-            print(e)
+        except (BaseException, UnboundLocalError, Exception, ConnectionRefusedError) as e:
+            print('错误信息提示：%s'%e)
             driver.close()
             driver.quit()
 
@@ -114,8 +114,7 @@ def run(n):
 
         post_url = ''
         if download_file_name:
-            path_mobileconfig = config_dit[
-                'downloadPath'] + '/' + download_file_name
+            path_mobileconfig = config_dit['downloadPath'] + '/' + download_file_name
             mobileconfig_url = get_mobileconfig_url(path_mobileconfig)
             post_url = mobileconfig_url[0]
 
@@ -129,19 +128,17 @@ def run(n):
 
         try:
             # 发送XML进行签名
-            response = requests.post(post_url, data=config_dit[
-                                     'xml'], headers=headers, proxies=proxies)
+            response = requests.post(post_url, data=config_dit['xml'], headers=headers, proxies=proxies)
             print("响应状态:", response.status_code)
             print('响应地址:', response.url)
 
             # 加载签名后返回的地址
             install_response = driver.get(response.url)
 
-        except Exception as e:
-            print(e)
+        except (BaseException, UnboundLocalError, Exception, ConnectionRefusedError) as e:
+            print('错误信息提示：%s'%e)
             driver.close()
             driver.quit()
-            continue
 
 
 if __name__ == '__main__':

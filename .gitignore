@@ -1,3 +1,4 @@
 /download
 /log
 */__pycache__
+*.mobileconfig
