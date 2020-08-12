@@ -47,8 +47,8 @@ def config_data(configs):
 
     download_path = '..' + '/download/' + autofile
 
-    if  Path(download_path).exists() == False:
-        os.mkdir(download_path)
+    #if  Path(download_path).exists() == False:
+    #    os.mkdir(download_path)
 
     config['downloadPath'] = download_path
 
