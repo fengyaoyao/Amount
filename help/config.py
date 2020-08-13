@@ -3,6 +3,7 @@
 import os
 import random
 import requests
+from time import sleep
 from pathlib import Path
 from help.tools import get_dir,get_proxy_ip,set_flow
 
@@ -27,10 +28,14 @@ def config_data(configs):
         # 获取代理IP
         proxy_ip = get_proxy_ip()
 
-        if proxy_ip:
-            config['proxy_ip'] = proxy_ip
+
+        while proxy_ip == False:
+            proxy_ip = get_proxy_ip()
+            sleep(1)
+
+        config['proxy_ip'] = proxy_ip
     except Exception as e:
-        config['proxy_ip'] = None
+        config['proxy_ip'] = False
         
     try:
         
@@ -40,7 +45,7 @@ def config_data(configs):
         if xml:
             config['xml'] = xml
     except Exception as e:
-        config['xml'] = None
+        config['xml'] = False
 
 
     autofile = set_flow()

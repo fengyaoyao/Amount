@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import json
+import redis
 import queue
 import random
 import requests
@@ -14,12 +15,13 @@ import urllib.parse
 from selenium import webdriver
 sys.path.append('../')
 from help.config import config_data
-from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, set_flow, wirteLog
+from help.tools import get_proxy_ip, wirteLog
 
 # 获取签名配置
 
 
 def get_sign(q1):
+
 
     config = config_data([
         {'url': 'https://doupoclub.com/receive/5ee210d78a135',
@@ -32,24 +34,45 @@ def get_sign(q1):
             'ischeck': ['5efdc065c1bdc', 'true']},
     ])
 
+    try:
+        proxy_ip = config['proxy_ip']
+    except KeyError as e:
+        print('错误信息提示：%s'%e)
+        proxy_ip = get_proxy_ip()
+        print(proxy_ip)
+
+        if proxy_ip == False:
+            q1.put('pass')
+            return
+
+        config['proxy_ip'] = proxy_ip
+
+
     # 代理
-    proxy_ip = config['proxy_ip']
     # 签名xml
     xml = config['xml']
 
     # 设置代理请求
-    proxies = {"http": 'http://' + proxy_ip}
+    proxies = {"https": 'https://' + proxy_ip}
     # 设置请求头
-    headers = {'Content-Type': 'application/xml'}
+    
+    headers = {'Content-Type': 'application/xml', 'Connection': 'close'}
     # 发起请求签名
-    response = requests.post(
-        config['url'], data=xml, headers=headers, proxies=proxies)
+    try:
+        
+        response = requests.post(config['url'], data=xml, headers=headers, proxies=proxies)
 
-    config['response_url'] = response.url
+        if len(response.url) > 1:
+            config['response_url'] = response.url
+            print('配置文件',config)
+            # 写入队列1
+            q1.put(config)
 
-    print('配置文件:', config)
-    # 写入队列1
-    q1.put(config)
+    except (requests.exceptions.ProxyError,ConnectionResetError,UnboundLocalError ) as e:
+        print('错误信息提示：%s'%e)
+        q1.put('pass')
+        
+
 
 
 # 根据连接获取udid
@@ -58,8 +81,14 @@ def get_sign(q1):
 def get_udid(url):
     par = urllib.parse.urlparse(url)
     query = urllib.parse.parse_qs(par.query)
-    if len(query['udid'][0]) == 0:
+
+    try:
+        if len(query['udid'][0]) == 0:
+            return False
+    except KeyError as e:
+        print('错误信息提示：%s'%e)
         return False
+
     return query['udid'][0]
 
 # 获取下载ID
@@ -68,99 +97,181 @@ def get_udid(url):
 def get_downloadId(q1, q2):
 
     queue_config = q1.get()
+    q1.task_done()
+    if queue_config == 'pass':
+        q2.put('pass')
+        return 
+
     udid = get_udid(queue_config['response_url'])
+
+    if udid == False:
+        q2.put('pass')
+        return 
+
     proxy_ip = queue_config['proxy_ip']
     requests_url = 'https://doupoclub.com/download/' + \
         queue_config['ischeck'][0] + '?udid=' + udid
 
-    proxies = {"http": 'http://' + proxy_ip}
+    proxies = {"https": 'https://' + proxy_ip}
 
     headers = {
         # 设置cookie
-        'Cookie': 'udid=' + udid
+        'Cookie': 'udid=' + udid,
+        'referer': queue_config['response_url'],
+        'Connection': 'close',
     }
 
-    # 请求获取downloadId
-    result = requests.get(requests_url, proxies=proxies, headers=headers)
+    try:
+        
+        # 请求获取downloadId
+        result = requests.get(requests_url, proxies=proxies, headers=headers)
+    except requests.exceptions.ProxyError as e:
+        print('错误信息提示：%s'%e)
+        
+
     # 字符串转字典
     content = json.loads(result.content)
 
     downloadId = content['data']['downloadId']
 
     if len(downloadId) > 0:
-        print('下载ID:', downloadId)
-        # 写入队列2
-        q2.put({'downloadId': downloadId, 'Cookie': 'udid=' +
-                udid, 'proxy_ip': queue_config['proxy_ip']})
 
+        data = {'downloadId': downloadId, 'Cookie': 'udid=' + udid, 'referer':queue_config['response_url'], 'proxy_ip': queue_config['proxy_ip']}
+
+        print('下载ID配置:', data)
+        # 写入队列2
+        q2.put(data)
+    else:
+        q2.put('pass')
 
 # 获取manifest.plist 文件下载链接
 
 
-def get_download_manifest_plist_url(q2, manifest_plist_urls):
+def get_download_manifest_plist_url(q2):
 
     queue2_config = q2.get()
-    manifest_plist_urls.append(queue2_config)
+    q2.task_done()
 
-    # proxy_ip = queue2_config['proxy_ip']
-    # Cookie = queue2_config['Cookie']
-    # downloadId = queue2_config['downloadId']
+    if queue2_config == 'pass':
+        return 
 
-    # proxies = {"http": 'http://' + proxy_ip}
+    proxy_ip = queue2_config['proxy_ip']
 
-    # headers = {'Cookie': Cookie}
+    if queue2_config['proxy_ip'] == False:
+        proxy_ip = get_proxy_ip()
+        if proxy_ip == False:
+            return
 
-    # status = True
+    proxies = {
+        'https': 'https://' +  proxy_ip
+    }
 
-    # downloadUrl = None
+    headers = {
+        'Cookie': queue2_config['Cookie'],
+        'referer':queue2_config['referer'],
+        'sec-fetch-dest':'empty',
+        'sec-fetch-mode':'cors',
+        'sec-fetch-site':'same-origin',
+        # 'Connection': 'close'
+    }
 
-    # while status:
+    for request in range(1,30):
+        
+        download_status_url = 'https://doupoclub.com/progrees/' + queue2_config['downloadId']
 
-    #     download_status_url = 'https://doupoclub.com/progrees/' + downloadId
+        try:
+            download_status_data = requests.get(download_status_url, proxies=proxies,timeout=(6.05, 27.05))
+        except (BaseException, Exception, ConnectionResetError ) as e:
+            print('错误信息提示：%s'%e)
+            continue
 
-    #     download_status_data = requests.get(
-    #         download_status_url, proxies=proxies, headers=headers)
+        try:
+            download_status_json = json.loads(download_status_data.content)
+        except Exception as e:
+            print('错误信息提示：%s'%e)
+            continue
 
-    #     download_status_json = json.loads(download_status_data.content)
+        if download_status_json['data']['complete'] != True:
+            continue
 
-    #     if len(download_status_json['data']['downloadUrl']) > 1:
+        if (download_status_json['data']['complete'] == True and len(download_status_json['data']['downloadUrl'])) > 1:
 
-    #         downloadUrlDit = re.findall(
-    # r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',
-    # download_status_json['data']['downloadUrl'])
+            downloadUrlDit = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',download_status_json['data']['downloadUrl'])
 
-    #         downloadUrl = downloadUrlDit[0]
+            print('获得下载地址:', downloadUrlDit[0])
+            wirteLog(downloadUrlDit[0])
+            break
 
-    #         status = False
+        sleep(0.5)
 
-    # manifest_plist_urls.append(downloadUrl)
+def  test():
+
+    proxy_ip = get_proxy_ip()
+
+    proxies = {"https": 'https://'+ proxy_ip}
+
+    headers = {
+        'Cache-Control': 'no-cache',
+        'Cookie':'udid=3i8cp716425i544242om29875787f9s424791b17',
+        'referer':'https://doupoclub.com/app/5ee2126bd1ca6?udid=3i8cp716425i544242om29875787f9s424791b17&t=1597308966&device=iPhone9,4&version=17D50&sign=29411306f5aa2068189bbfd554a10b22',
+        'sec-fetch-dest':'empty',
+        'sec-fetch-mode':'cors',
+        'sec-fetch-site':'same-origin',
+        'user-agent':'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+    }
+
+    for request in range(1,30):
+        
+        download_status_url = 'https://doupoclub.com/progrees/A813089778601245'
+
+        try:
+            download_status_data = requests.get(download_status_url, proxies=proxies)
+            if download_status_data.status_code != 200:
+                continue
+            print(download_status_data.content)
+        except (BaseException, Exception, ConnectionResetError ) as e:
+            print('错误信息提示：%s'%e)
+            continue
+        try:
+            download_status_json = json.loads(download_status_data.content)
+        except Exception as e:
+            print('错误信息提示：%s'%e)
+            continue
+
+        if download_status_json['data']['complete'] != True:
+            continue
+
+        if (len(download_status_json['data']['downloadUrl'])) > 1 and download_status_json['data']['complete'] == True:
+
+            downloadUrlDit = re.findall(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+',download_status_json['data']['downloadUrl'])
+            print(downloadUrlDit)
+            break
+        sleep(2)
 
 if __name__ == '__main__':
 
-    manifest_plist_urls = []
-    thread_list = []
+    # redis = redis.Redis(host='127.0.0.1', port=6379, db=0,password=123456, decode_responses=True)  
+    # print(redis.get('test'))
+    # test()
+    # exit()
     q1 = queue.Queue()
     q2 = queue.Queue()
 
-    for x in range(1, 3):
+    for y in range(1, 10):
         t1 = threading.Thread(target=get_sign, args=(q1,))
         t1.start()
-        sleep(2)
-        thread_list.append(t1)
+        t1.join()
+        sleep(1)
 
-    for y in range(1, 3):
+    for y in range(1, 10):
         t2 = threading.Thread(target=get_downloadId, args=(q1, q2,))
         t2.start()
-        sleep(0.5)
-        thread_list.append(t2)
+        t2.join()
 
-    for z in range(1, 3):
+    for z in range(1, 10):
         t3 = threading.Thread(
-            target=get_download_manifest_plist_url, args=(q2, manifest_plist_urls,))
+            target=get_download_manifest_plist_url, args=(q2,))
         t3.start()
-        thread_list.append(t3)
 
-    for Thread in thread_list:
-        Thread.join()
 
-    print('文件下载地址:', manifest_plist_urls)
+    print('主程序结束')
