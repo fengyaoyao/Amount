@@ -44,10 +44,11 @@ def get_proxy_ip():
     headers = {'Cache-Control': 'no-cache'}
     url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=53362&port=11&lb=1&pb=45&regions='
     get_ip = requests.get(url, headers).text.strip()
+
     if is_json(get_ip):
 
         result_str = json.loads(get_ip)
-        if len(result_str['msg']) == 1:
+        if len(result_str['msg']) > 1:
             myip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', result_str['msg'])[0]
             white_proxy_url = 'http://ty-http-d.upupfile.com/index/white/add?neek=tyhttp487901&appkey=3e096aec1eecdba33d44249454053a07&white='
             response = requests.get(white_proxy_url + myip, headers).text

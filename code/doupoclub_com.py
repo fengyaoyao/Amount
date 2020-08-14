@@ -24,14 +24,10 @@ def get_sign(q1):
 
 
     config = config_data([
-        {'url': 'https://doupoclub.com/receive/5ee210d78a135',
-            'ischeck': ['5ee210d78a135', 'true']},
-        {'url': 'https://doupoclub.com/receive/5f046d0dbbcab',
-            'ischeck': ['5f046d0dbbcab', 'true']},
-        {'url': 'https://doupoclub.com/receive/5ee2126bd1ca6',
-            'ischeck': ['5ee2126bd1ca6', 'true']},
-        {'url': 'https://doupoclub.com/receive/5efdc065c1bdc',
-            'ischeck': ['5efdc065c1bdc', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee210d78a135','ischeck': ['5ee210d78a135', 'true']},
+        {'url': 'https://doupoclub.com/receive/5f046d0dbbcab','ischeck': ['5f046d0dbbcab', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee2126bd1ca6','ischeck': ['5ee2126bd1ca6', 'true']},
+        {'url': 'https://doupoclub.com/receive/5efdc065c1bdc','ischeck': ['5efdc065c1bdc', 'true']},
     ])
 
     try:
@@ -125,14 +121,15 @@ def get_downloadId(q1, q2):
         
         # 请求获取downloadId
         result = requests.get(requests_url, proxies=proxies, headers=headers)
-    except requests.exceptions.ProxyError as e:
+        # 字符串转字典
+        content = json.loads(result.content)
+        downloadId = content['data']['downloadId']
+    except (Exception, requests.exceptions.ProxyError, TypeError) as e:
         print('错误信息提示：%s'%e)
+        q2.put('pass')
+        return 
         
 
-    # 字符串转字典
-    content = json.loads(result.content)
-
-    downloadId = content['data']['downloadId']
 
     if len(downloadId) > 0:
 
