@@ -11,143 +11,200 @@ from time import sleep
 from selenium import webdriver
 sys.path.append('../')
 from help.config import config_data
-from help.tools import find_file, delete_path, get_mobileconfig_url,get_proxy_ip
-
-
-# config = [
-#     {'url': 'https://iosvipsign.site/install/798-75'},
-# ]
+from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow
 
 
 def run():
 
     try:
 
-        config_dit = config_data([{'url': 'https://798-1.com/79l-won-cfk/','click':'/html/body/div[1]/div[1]/div[1]/a[2]'}])
+        config_dit = config_data([{'url': 'https://798-1.com/79l-won-cfk/',
+                                   'click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'}])
 
-        if config_dit['proxy_ip'] != None and config_dit['xml'] != None :
+        if config_dit['proxy_ip'] != False and config_dit['xml'] != False:
+
+            download_file = get_dir() + '/download/' + set_flow()
 
             proxy_ip = config_dit['proxy_ip']
+            print('代理IP', proxy_ip)
+
             mobileEmulation = {'deviceName': config_dit['deviceName']}
-            prefs = {'download.default_directory': config_dit['downloadPath'], 'download.prompt_for_download': False}
+            prefs = {'download.default_directory': download_file,
+                     'download.prompt_for_download': False}
 
             chrome_options = webdriver.ChromeOptions()
             chrome_options.add_argument('--headless')
             chrome_options.add_argument("--proxy-server=http://" + proxy_ip)
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument('--safebrowsing-disable-download-protection')
-            chrome_options.add_argument('--safebrowsing-disable-extension-blacklist')
-            chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
+            chrome_options.add_argument(
+                '--safebrowsing-disable-download-protection')
+            chrome_options.add_argument(
+                "--safebrowsing-disable-extension-blacklist")
+            chrome_options.add_experimental_option(
+                'mobileEmulation', mobileEmulation)
             chrome_options.add_experimental_option('prefs', prefs)
-            chrome_options.add_experimental_option( 'excludeSwitches', ['enable-logging', 'enable-automation'])
+            chrome_options.add_experimental_option(
+                'excludeSwitches', ['enable-logging', 'enable-automation'])
             driver = webdriver.Chrome(options=chrome_options)
-            driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
-            params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': config_dit['downloadPath']}}
+
+            driver.command_executor._commands["send_command"] = (
+                "POST", '/session/$sessionId/chromium/send_command')
+            params = {'cmd': 'Page.setDownloadBehavior', 'params': {
+                'behavior': 'allow', 'downloadPath': download_file}}
             driver.execute("send_command", params)
+
             driver.get(config_dit['url'])
             driver.implicitly_wait(1)
-
             driver.find_element_by_xpath(config_dit['click']).click()
+            driver.implicitly_wait(1)
+            driver.find_element_by_xpath(config_dit['install']).click()
+            driver.implicitly_wait(1)
 
-            sleep(10)
-            print(driver.current_url)
-            cookies = driver.get_cookies()
-            print(driver.get_cookies())
-            driver.close()
-            driver.quit()
-            exit()
+            cookie = driver.get_cookie('ios_vip_sign_session')
 
-            ios_vip_sign_session = driver.get_cookie('ios_vip_sign_session')
+            for x in range(1, 8):
+                download_file_name = find_file(download_file)
+                if download_file_name:
+                    break
+                sleep(1)
 
+            post_url = None
+            if download_file_name:
+                path_mobileconfig = download_file + '/' + download_file_name
+                mobileconfig_url = get_mobileconfig_url(path_mobileconfig)
+                post_url = mobileconfig_url[0]
 
-            if len(ios_vip_sign_session['value']) <= 0:
+            print('当前页面URL地址:', driver.current_url)
+            print('Cookie:', cookie)
+            print('配置文件链接:', post_url)
+            delete_path(download_file)
 
-                driver.close()
-                driver.quit()
+            if post_url is not None:
 
-                return None
+                proxies = {"https": 'https://' + proxy_ip}
+                headers = {'Content-Type': 'application/xml'}
+                response = requests.post(post_url, data=config_dit[
+                                         'xml'], headers=headers, proxies=proxies)
+                print('发送XML响应URL状态', response.status_code)
+                print('发送XML响应URL', response.url)
+                driver.get(response.url)
+                driver.implicitly_wait(2)
 
-            config_dit['ios_vip_sign_session'] = 'ios_vip_sign_session='+ios_vip_sign_session['value']
+                status = True
+                while status:
+                    text = driver.find_element_by_xpath(
+                        config_dit['install']).text
+                    print(text)
+                    if text == '正在下载中...' or text == '再试一次' or text == '网络错误':
+                        status = False
+                        break
+                    sleep(1)
 
-            print('config',config_dit)
-            proxy_ip = config_dit['proxy_ip']
-            url = 'https://iosvipsign.site/build/798-75.ipa'
-            xml = config_dit['xml']
-            post_data = {
-                "UDID": "",
-                "appenddata": "",
-                "device_name": "",
-                "device_product": "",
-                "device_version": ""
-            }
+        # par = urllib.parse.urlparse(driver.current_url)
+        # data = urllib.parse.parse_qs(par.query)
 
-            # 设置代理请求
-            proxies = {"https": 'https://' + config_dit['proxy_ip']}
-            # 设置请求头
+        # post_data = {
+        #     'appenddata': data['appenddata'][0],
+        #     'UDID': '',
+        #     'device_name': '',
+        #     'device_product': '',
+        #     'device_version': ''
+        # }
 
-            headers = {'Content-Type': 'application/json;charset=UTF-8','Cookie':config_dit['ios_vip_sign_session']}
-            # 发起请求签名
-            response = requests.post(url, data=post_data, headers=headers, proxies=proxies)
+        # headers = {
+        #     'Content-Type': 'application/json;charset=UTF-8',
+        #     'Cookie': 'ios_vip_sign_session=' + cookie['value'],
+        #     'Referer': driver.current_url,
+        #     'Sec-Fetch-Dest': 'empty',
+        #     'Sec-Fetch-Mode': 'cors',
+        #     'Sec-Fetch-Site': 'same-origin',
+        # }
 
-            print('mobileconfigUrl:',response.content)
+        # proxies = {"https": 'https://' + config_dit['proxy_ip']}
 
-            r = requests.get(response.content)
-            with open('test.mobileconfig', 'wb') as f:
-                f.write(r.content)
+        # response = requests.post('https://iosvipsign.site/build/798-75.ipa',
+        # data=post_data, headers=headers, proxies=proxies)
 
-            # 读取mobileconfig文件的请求地址
-            post_url = get_mobileconfig_url('test.mobileconfig')[0];
-            print('配置文件的链接：',post_url)
+        # print('响应内容:', response.content)
+        # print('响应URL:', response.url)
 
+        # r = requests.get(response.content)
+        # with open('./test.mobileconfig', 'wb') as f:
+        #     f.write(r.content)
 
-            response = requests.post(post_url, data=xml, headers={'Content-Type': 'application/xml'}, proxies=proxies)
+        # mobileconfig_url = get_mobileconfig_url('./test.mobileconfig')
+        # print('文件URL:', mobileconfig_url)
 
-            print('发送XML响应URL',response.url)
-
-            par = urllib.parse.urlparse(response.url)
-            query = urllib.parse.parse_qs(par.query)
-
-            post_data['UDID'] = query['UDID'][0]
-            post_data['appenddata'] = '%7B%22ChannelInfo%22%3A%22%7C%7C798%7Chttps%3A%2F%2F798-1.com%2F79l-won-cfk%2F%7C1597372246636%7C2df93ad47a7451cdabfb5f4db9d1f6c8%22%2C%22test%22%3A%22hello%22%7D'
-            post_data['device_product'] = query['DEVICE_PRODUCT'][0]
-            post_data['device_version'] = query['DEVICE_VERSION'][0]
-
-            headers['Connection'] = 'keep-alive'
-            headers['Sec-Fetch-Dest'] = 'empty'
-            headers['Sec-Fetch-Mode'] = 'cors'
-            headers['Sec-Fetch-Site'] = 'same-origin'
-
-            response_sign = requests.post(url, data=post_data, headers=headers, proxies=proxies)
-
-
-            print("请求签名响应:", response_sign.content)
-
-
-            driver.close()
-            driver.quit()
-
-            # return config_dit
+        driver.close()
+        driver.quit()
 
     except (BaseException, Exception, ConnectionResetError, TypeError) as e:
-        print('错误信息提示：%s'%e)
+        driver.close()
+        driver.quit()
+        print('错误信息提示：%s' % e)
 
 
 if __name__ == '__main__':
     run()
     exit()
+    for x in range(1, 20):
 
+        config_dit = config_data(
+            [{'url': 'https://iosvipsign.site/install/798-75'}])
 
-    config_dit = config_data([{'url': 'https://iosvipsign.site/install/798-75'}])
+        post_url = 'https://verify.iosvipsign.site/accept.php?app=NzV8JTdCJTIyQ2hhbm5lbEluZm8lMjIlM0ElMjIlN0MlN0M3OTglN0NodHRwcyUzQSUyRiUyRjc5OC0xLmNvbSUyRjc5bC13b24tY2ZrJTJGJTdDMTU5NzQ5OTQxNTYxNiU3Q2Q5MzdhMjE0ODllZTJjMzc1NjdmYzQxMTc1MzI0YmUyJTIyJTJDJTIydGVzdCUyMiUzQSUyMmhlbGxvJTIyJTdE'
+        proxies = {"https": 'https://' + config_dit['proxy_ip']}
 
-    post_url = 'https://verify.iosvipsign.site/accept.php?app=NzV8JTdCJTIyQ2hhbm5lbEluZm8lMjIlM0ElMjIlN0MlN0M3OTglN0NodHRwcyUzQSUyRiUyRjc5OC0xLmNvbSUyRjc5bC13b24tY2ZrJTJGJTdDMTU5NzM5NjUzODcwMSU3QzRlYmMxYzJiOTg1YTk1ZmU2MGI5MTZhZDJlZGI5N2Y0JTIyJTJDJTIydGVzdCUyMiUzQSUyMmhlbGxvJTIyJTdE'
-    proxies = {"https": 'https://' + config_dit['proxy_ip']}
+        response = requests.post(post_url, data=config_dit['xml'], headers={
+                                 'Content-Type': 'application/xml'}, proxies=proxies)
 
-    response = requests.post(post_url, data=config_dit['xml'], headers={'Content-Type': 'application/xml','Cookie':'cookie_udid=eyJpdiI6IlF6QzZrM2dxRUEvUkV3a3RZSHIrU1E9PSIsInZhbHVlIjoiK1crV1p4MW1kS1ZxalMvVFlCZVBwdz09IiwibWFjIjoiZDU4ZDM1MTU1YmJhM2I1NTA2ZTBiYjhmNmQ4YWUxNzY2NTg5MzA1NGM1ZjA5ZjI3MTYzNDQ0YzFhYTMwNzA5YiJ9; ios_vip_sign_session=eyJpdiI6Im1pOVI3UXlTcmNEclBLUFY3ZC9QREE9PSIsInZhbHVlIjoiaDhkVDBZYXBqbWVlTUEvTUNYL1ZQNDB6WWRFeE5OQU9mWlhlZ2xTZEY1eDVSVzZaOXRPN244dnRPRHdZL0NvKyIsIm1hYyI6IjMxMzRmYWUxNDE1YmMxNTAwOGYyOTE5MTMzMzVhOTZlZjZiMDU0NTM1MjJmZTJmMTM2ZjY5ZWUwOTUxYWEzZGEifQ%3D%3D'}, proxies=proxies)
+        print('发送XML响应URL状态', response.status_code)
+        print('发送XML响应URL', response.url)
+        sleep(1)
 
-    print('发送XML响应URL状态',response.status_code)
-    print('发送XML响应URL',response.url)
+    exit()
 
+    mobileEmulation = {'deviceName': config_dit['deviceName']}
+    prefs = {'download.default_directory': config_dit[
+        'downloadPath'], 'download.prompt_for_download': False}
+
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument(
+        "--proxy-server=http://" + config_dit['proxy_ip'])
+    chrome_options.add_argument('--ignore-certificate-errors')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument(
+        '--safebrowsing-disable-download-protection')
+    chrome_options.add_argument(
+        '--safebrowsing-disable-extension-blacklist')
+    chrome_options.add_experimental_option(
+        'mobileEmulation', mobileEmulation)
+    chrome_options.add_experimental_option('prefs', prefs)
+    chrome_options.add_experimental_option(
+        'excludeSwitches', ['enable-logging', 'enable-automation'])
+    driver = webdriver.Chrome(options=chrome_options)
+    driver.command_executor._commands["send_command"] = (
+        "POST", '/session/$sessionId/chromium/send_command')
+    params = {'cmd': 'Page.setDownloadBehavior', 'params': {
+        'behavior': 'allow', 'downloadPath': config_dit['downloadPath']}}
+    driver.execute("send_command", params)
+    driver.get(response.url)
+
+    for x in range(1, 7):
+
+        text = driver.find_element_by_xpath('//*[@id="install-btn"]').text
+        print(text)
+        if len(text) == 8:
+            break
+        if text == '再试一次':
+            break
+        sleep(20)
+
+    driver.close()
+    driver.quit()
+    exit()
 
     par = urllib.parse.urlparse(response.url)
     query = urllib.parse.parse_qs(par.query)
@@ -158,21 +215,20 @@ if __name__ == '__main__':
         "device_product": "",
         "device_version": ""
     }
-# {"ChannelInfo":"||798|https://798-1.com/79l-won-cfk/|1597396538701|4ebc1c2b985a95fe60b916ad2edb97f4"}
-
     post_data['UDID'] = query['UDID'][0]
-    post_data['appenddata'] = '%7B%22ChannelInfo%22%3A%22%7C%7C798%7Chttps%3A%2F%2F798-1.com%2F79l-won-cfk%2F%7C1597396538701%7C4ebc1c2b985a95fe60b916ad2edb97f4%22%2C%22test%22%3A%22hello%22%7D'
+    post_data[
+        'appenddata'] = ''
     post_data['device_product'] = query['DEVICE_PRODUCT'][0]
     post_data['device_version'] = query['DEVICE_VERSION'][0]
 
-    headers = {'Content-Type': 'application/json;charset=UTF-8','Cookie':'cookie_udid=eyJpdiI6IlF6QzZrM2dxRUEvUkV3a3RZSHIrU1E9PSIsInZhbHVlIjoiK1crV1p4MW1kS1ZxalMvVFlCZVBwdz09IiwibWFjIjoiZDU4ZDM1MTU1YmJhM2I1NTA2ZTBiYjhmNmQ4YWUxNzY2NTg5MzA1NGM1ZjA5ZjI3MTYzNDQ0YzFhYTMwNzA5YiJ9; ios_vip_sign_session=eyJpdiI6Im1pOVI3UXlTcmNEclBLUFY3ZC9QREE9PSIsInZhbHVlIjoiaDhkVDBZYXBqbWVlTUEvTUNYL1ZQNDB6WWRFeE5OQU9mWlhlZ2xTZEY1eDVSVzZaOXRPN244dnRPRHdZL0NvKyIsIm1hYyI6IjMxMzRmYWUxNDE1YmMxNTAwOGYyOTE5MTMzMzVhOTZlZjZiMDU0NTM1MjJmZTJmMTM2ZjY5ZWUwOTUxYWEzZGEifQ%3D%3D'}
+    headers = {'Content-Type': 'application/json;charset=UTF-8', 'Cookie': 'os_vip_sign_session=eyJpdiI6IjZIVHM3MzhtUjNub2REQmNMRXNHMUE9PSIsInZhbHVlIjoiQWN2QVJkcERiRFcwaTBTYVVXcUR5TzdYakdiTlB5dlp5OFJEUjRrUTlza1lMcHNkR1EzVGltMWx3SDlleEk1WCIsIm1hYyI6IjdjNTFmNzNhZDYzNTYwZTdhZWY4MGZmMTYwZWJkNjk4NjE1OGUyNDc0NWUyZGE0ZjQ5MDBjYWZiOGVhYzIzMDEifQ%3D%3D'}
 
     headers['Connection'] = 'keep-alive'
     headers['Sec-Fetch-Dest'] = 'empty'
     headers['Sec-Fetch-Mode'] = 'cors'
     headers['Sec-Fetch-Site'] = 'same-origin'
 
-    response_sign = requests.post('https://iosvipsign.site/build/798-75.ipa', data=post_data, headers=headers, proxies=proxies)
-
+    response_sign = requests.post(
+        'https://iosvipsign.site/build/798-75.ipa', data=post_data, headers=headers, proxies=proxies)
 
     print("请求签名响应:", response_sign.content)
