@@ -181,5 +181,24 @@ def get_download_manifest_plist_url(q2):
         sleep(0.5)
 
 
-mobileconfig_url = get_mobileconfig_url('./111.mobileconfig')
-print(mobileconfig_url)
+if __name__ == '__main__':
+
+    strs = 'left: 27.5px;'
+    result = re.compile(r'\d+\.?\d*').findall(strs)[0]
+    print( float(result) + 1)
+    # proxy_ip = get_proxy_ip()
+    # print('代理IP',proxy_ip)
+    # xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
+    # print('xml',xml)
+    # result = re.compile(r'(?<=<key>UDID</key><string>)(.*?)(?=</string>)').findall(xml)
+    # print(result)
+    # post_url = 'https://down.8iosapp.com/download/report/5KZD'
+    # # proxies = {"https": 'https://' + proxy_ip}
+    # headers = {'Content-Type': 'application/xml'}
+    # response = requests.post(post_url, data=xml, headers=headers)
+    # print('发送XML响应URL状态', response.status_code)
+    # print('发送XML响应URL', response.url)
+    # print('发送XML响应header', response.headers)
+
+    # mobileconfig_url = get_mobileconfig_url('./111.mobileconfig')
+    # print(mobileconfig_url)

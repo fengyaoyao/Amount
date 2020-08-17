@@ -35,7 +35,7 @@ def get_sign(q1):
     try:
         proxy_ip = config['proxy_ip']
     except KeyError as e:
-        print('错误信息提示：%s' % e)
+        print('代理IP错误信息提示：%s' % e)
         proxy_ip = get_proxy_ip()
         print(proxy_ip)
 
@@ -67,7 +67,7 @@ def get_sign(q1):
             q1.put(config)
 
     except (requests.exceptions.ProxyError, ConnectionResetError, UnboundLocalError) as e:
-        print('错误信息提示：%s' % e)
+        print('发起xml请求签名错误信息提示：%s' % e)
         q1.put('pass')
 
 
@@ -82,7 +82,7 @@ def get_udid(url):
         if len(query['udid'][0]) == 0:
             return False
     except KeyError as e:
-        print('错误信息提示：%s' % e)
+        print('获取udid错误信息提示：%s' % e)
         return False
 
     return query['udid'][0]
@@ -121,11 +121,12 @@ def get_downloadId(q1, q2):
 
         # 请求获取downloadId
         result = requests.get(requests_url, proxies=proxies, headers=headers)
+        print('下载ID响应:',result.content)
         # 字符串转字典
         content = json.loads(result.content)
         downloadId = content['data']['downloadId']
     except (Exception, requests.exceptions.ProxyError, TypeError) as e:
-        print('错误信息提示：%s' % e)
+        print('获取downloadId错误信息提示：%s' % e)
         q2.put('pass')
         return
 
@@ -181,13 +182,13 @@ def get_download_manifest_plist_url(q2):
             download_status_data = requests.get(
                 download_status_url, proxies=proxies)
         except (BaseException, Exception, ConnectionResetError) as e:
-            print('错误信息提示：%s' % e)
+            print('获取manifest.plist链接错误信息提示：%s' % e)
             continue
 
         try:
             download_status_json = json.loads(download_status_data.content)
         except Exception as e:
-            print('错误信息提示：%s' % e)
+            print('解析manifest.plist错误信息提示：%s' % e)
             continue
 
         if download_status_json['data']['complete'] != True:
