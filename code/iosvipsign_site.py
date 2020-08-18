@@ -11,7 +11,7 @@ from time import sleep
 from selenium import webdriver
 sys.path.append('../')
 from help.config import config_data
-from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow
+from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow, wirteLog
 
 
 def run():
@@ -97,6 +97,7 @@ def run():
                         config_dit['install']).text
                     print(text)
                     if text == '正在下载中...' or text == '再试一次' or text == '网络错误':
+                        wirteLog('正在下载中...')
                         status = False
                         break
                     sleep(1)
@@ -136,7 +137,7 @@ def run():
         # mobileconfig_url = get_mobileconfig_url('./test.mobileconfig')
         # print('文件URL:', mobileconfig_url)
 
-        driver.close()
+        # driver.close()
         driver.quit()
 
     except (BaseException, Exception, ConnectionResetError, TypeError) as e:
