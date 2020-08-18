@@ -18,8 +18,10 @@ def run():
 
     try:
 
-        config_dit = config_data([{'url': 'https://798-1.com/79l-won-cfk/',
-                                   'click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'}])
+        config_dit = config_data([
+            {'url': 'https://798-1.com/79l-won-cfk/','click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'},
+            {'url': 'https://369vk.com','click': '/html/body/div/div[2]/div/a[2]', 'install': '//*[@id="install-btn"]'},
+        ])
 
         if config_dit['proxy_ip'] != False and config_dit['xml'] != False:
 
@@ -108,48 +110,20 @@ def run():
                         status = False
                         break
                     sleep(1)
-
-        # par = urllib.parse.urlparse(driver.current_url)
-        # data = urllib.parse.parse_qs(par.query)
-
-        # post_data = {
-        #     'appenddata': data['appenddata'][0],
-        #     'UDID': '',
-        #     'device_name': '',
-        #     'device_product': '',
-        #     'device_version': ''
-        # }
-
-        # headers = {
-        #     'Content-Type': 'application/json;charset=UTF-8',
-        #     'Cookie': 'ios_vip_sign_session=' + cookie['value'],
-        #     'Referer': driver.current_url,
-        #     'Sec-Fetch-Dest': 'empty',
-        #     'Sec-Fetch-Mode': 'cors',
-        #     'Sec-Fetch-Site': 'same-origin',
-        # }
-
-        # proxies = {"https": 'https://' + config_dit['proxy_ip']}
-
-        # response = requests.post('https://iosvipsign.site/build/798-75.ipa',
-        # data=post_data, headers=headers, proxies=proxies)
-
-        # print('响应内容:', response.content)
-        # print('响应URL:', response.url)
-
-        # r = requests.get(response.content)
-        # with open('./test.mobileconfig', 'wb') as f:
-        #     f.write(r.content)
-
-        # mobileconfig_url = get_mobileconfig_url('./test.mobileconfig')
-        # print('文件URL:', mobileconfig_url)
-
-
             driver.quit()
 
     except (BaseException, Exception, ConnectionResetError, TypeError) as e:
         print('错误信息提示：%s' % e)
 
 
+
+def runThread():
+
+    for i in range(1, 4):
+        t = threading.Thread(target=run)
+        t.start()
+        sleep(2)
+    
+
 if __name__ == '__main__':
-    run()
+    runThread()

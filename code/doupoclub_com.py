@@ -22,14 +22,11 @@ from help.tools import get_proxy_ip, wirteLog
 def get_sign(q1):
 
     config = config_data([
-        {'url': 'https://doupoclub.com/receive/5ee210d78a135',
-         'ischeck': ['5ee210d78a135', 'true']},
-        {'url': 'https://doupoclub.com/receive/5f046d0dbbcab',
-         'ischeck': ['5f046d0dbbcab', 'true']},
-        {'url': 'https://doupoclub.com/receive/5ee2126bd1ca6',
-         'ischeck': ['5ee2126bd1ca6', 'true']},
-        {'url': 'https://doupoclub.com/receive/5efdc065c1bdc',
-            'ischeck': ['5efdc065c1bdc', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee210d78a135','ischeck': ['5ee210d78a135', 'true']},
+        {'url': 'https://doupoclub.com/receive/5f046d0dbbcab','ischeck': ['5f046d0dbbcab', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee2126bd1ca6','ischeck': ['5ee2126bd1ca6', 'true']},
+        {'url': 'https://doupoclub.com/receive/5efdc065c1bdc','ischeck': ['5efdc065c1bdc', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee36de675aa3','ischeck': ['5ee36de675aa3', 'true']},
     ])
 
     try:
@@ -205,74 +202,24 @@ def get_download_manifest_plist_url(q2):
 
         sleep(1)
 
-
-def test():
-
-    proxy_ip = get_proxy_ip()
-
-    proxies = {"https": 'https://' + proxy_ip}
-
-    headers = {
-        'Cache-Control': 'no-cache',
-        'Cookie': 'udid=3i8cp716425i544242om29875787f9s424791b17',
-        'referer': 'https://doupoclub.com/app/5ee2126bd1ca6?udid=3i8cp716425i544242om29875787f9s424791b17&t=1597308966&device=iPhone9,4&version=17D50&sign=29411306f5aa2068189bbfd554a10b22',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-    }
-
-    for request in range(1, 30):
-
-        download_status_url = 'https://doupoclub.com/progrees/A813089778601245'
-
-        try:
-            download_status_data = requests.get(
-                download_status_url, proxies=proxies)
-            if download_status_data.status_code != 200:
-                continue
-            print(download_status_data.content)
-        except (BaseException, Exception, ConnectionResetError) as e:
-            print('错误信息提示：%s' % e)
-            continue
-        try:
-            download_status_json = json.loads(download_status_data.content)
-        except Exception as e:
-            print('错误信息提示：%s' % e)
-            continue
-
-        if download_status_json['data']['complete'] != True:
-            continue
-
-        if (len(download_status_json['data']['downloadUrl'])) > 1 and download_status_json['data']['complete'] == True:
-
-            downloadUrlDit = re.findall(
-                r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', download_status_json['data']['downloadUrl'])
-            print(downloadUrlDit)
-            break
-        sleep(2)
-
 if __name__ == '__main__':
-    # redis = redis.Redis(host='127.0.0.1', port=6379, db=0,password=123456, decode_responses=True)
-    # print(redis.get('test'))
-    # test()
 
     q1 = queue.Queue()
     q2 = queue.Queue()
 
-    for y in range(1, 10):
+    for y in range(1, 5):
         t1 = threading.Thread(target=get_sign, args=(q1,))
         t1.start()
         t1.join()
         sleep(1)
 
-    for y in range(1, 10):
+    for y in range(1, 5):
         t2 = threading.Thread(target=get_downloadId, args=(q1, q2,))
         t2.start()
         t2.join()
         sleep(0.5)
 
-    for z in range(1, 10):
+    for z in range(1, 5):
         t3 = threading.Thread(
             target=get_download_manifest_plist_url, args=(q2,))
         t3.start()
