@@ -11,7 +11,7 @@ from time import sleep
 from selenium import webdriver
 sys.path.append('../')
 from help.config import config_data
-from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow,get_system,wirteLog
+from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow, get_system, wirteLog
 
 
 def run():
@@ -19,14 +19,16 @@ def run():
     try:
 
         config_dit = config_data([
-            {'url': 'https://798-1.com/79l-won-cfk/','click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'},
-            {'url': 'https://369vk.com','click': '/html/body/div/div[2]/div/a[2]', 'install': '//*[@id="install-btn"]'},
+            {'url': 'https://798-1.com/79l-won-cfk/',
+                'click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'},
+            {'url': 'https://369vk.com',
+                'click': '/html/body/div/div[2]/div/a[2]', 'install': '//*[@id="install-btn"]'},
         ])
 
         if config_dit['proxy_ip'] != False and config_dit['xml'] != False:
 
             if get_system() == 'Windows':
-                
+
                 download_file = get_dir() + '\\download\\' + set_flow()
             else:
                 download_file = get_dir() + '/download/' + set_flow()
@@ -106,6 +108,7 @@ def run():
                         config_dit['install']).text
                     print(text)
                     if text == '正在下载中...' or text == '再试一次' or text == '网络错误':
+
                         wirteLog(text)
                         status = False
                         break
@@ -116,14 +119,13 @@ def run():
         print('错误信息提示：%s' % e)
 
 
-
 def runThread():
 
     for i in range(1, 4):
         t = threading.Thread(target=run)
         t.start()
         sleep(2)
-    
+
 
 if __name__ == '__main__':
     runThread()
