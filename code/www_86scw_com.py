@@ -101,7 +101,7 @@ def runs():
         driver.implicitly_wait(1)
 
 
-        for x in range(1,60):
+        for x in range(1,80):
             text = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div[2]/div[2]/div/div[1]').text
             print('安装动作:',text)
             if text == '返回桌面查看' or text == '刷新重试!':

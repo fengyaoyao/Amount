@@ -12,6 +12,7 @@ import json
 import platform
 import shutil
 import random
+from time import sleep
 
 
 # 判断字符串是否是json
@@ -42,13 +43,24 @@ def get_dir():
 def get_proxy_ip():
 
     headers = {'Cache-Control': 'no-cache'}
-    url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=53362&port=11&lb=1&pb=45&regions='
+    url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=53730&port=1&lb=1&pb=4&regions='
     get_ip = requests.get(url, headers).text.strip()
 
     if is_json(get_ip):
 
         result_str = json.loads(get_ip)
-        if len(result_str['msg']) > 1:
+
+        if result_str['code'] == 121:
+            
+            print(result_str['msg'])
+            exit()
+
+        elif result_str['msg'] == '请2秒后再试':
+            sleep(1.5)
+            get_ip = requests.get(url, headers).text.strip()
+
+    
+        elif len(result_str['msg']) > 1:
             myip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', result_str['msg'])[0]
             white_proxy_url = 'http://ty-http-d.upupfile.com/index/white/add?neek=tyhttp487901&appkey=3e096aec1eecdba33d44249454053a07&white='
             response = requests.get(white_proxy_url + myip, headers).text
@@ -159,3 +171,7 @@ def get_move_coordinates(bg_path, front_path):
     result = cv2.matchTemplate(bg, front, cv2.TM_CCOEFF_NORMED)  # 精度最高，速度最慢
     x, y = np.unravel_index(result.argmax(), result.shape)
     return y
+
+def print_exception(e):
+    
+    print("Error '%s' happened on line %d" % (e[0], e[1][1]))

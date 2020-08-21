@@ -29,18 +29,11 @@ def get_sign(q1):
         {'url': 'https://doupoclub.com/receive/5ee36de675aa3','ischeck': ['5ee36de675aa3', 'true']},
     ])
 
-    try:
-        proxy_ip = config['proxy_ip']
-    except KeyError as e:
-        print('代理IP错误信息提示：%s' % e)
-        proxy_ip = get_proxy_ip()
-        print(proxy_ip)
+    if config['proxy_ip'] == False or config['xml'] == False:
+        q1.put('pass')
+        return None
 
-        if proxy_ip == False:
-            q1.put('pass')
-            return
-
-        config['proxy_ip'] = proxy_ip
+    proxy_ip = config['proxy_ip'] 
 
     # 代理
     # 签名xml
@@ -169,7 +162,7 @@ def get_download_manifest_plist_url(q2):
         # 'Connection': 'close'
     }
 
-    for request in range(1, 30):
+    for request in range(1, 100):
 
         download_status_url = 'https://doupoclub.com/progrees/' + \
             queue2_config['downloadId']
