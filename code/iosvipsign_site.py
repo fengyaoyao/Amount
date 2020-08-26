@@ -4,11 +4,15 @@ import os
 import sys
 import requests
 import queue
+import urllib3
 import platform
 import threading
 import urllib.parse
 from time import sleep
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 sys.path.append('../')
 from help.config import config_data
 from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow, get_system, wirteLog
@@ -63,11 +67,16 @@ def run():
             driver.execute("send_command", params)
 
             driver.get(config_dit['url'])
-            driver.implicitly_wait(1)
-            driver.find_element_by_xpath(config_dit['click']).click()
-            driver.implicitly_wait(1)
-            driver.find_element_by_xpath(config_dit['install']).click()
-            driver.implicitly_wait(1)
+
+            try:
+                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, config_dit['click']))).click()
+                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, config_dit['install']))).click()
+            except (Exception, NameError, ConnectionRefusedError, urllib3.exceptions.NewConnectionError) as e:
+                print('错误信息提示：%s' % e)
+                driver.quit()
+                return None
+
+            sleep(1)
             cookie = driver.get_cookie('ios_vip_sign_session')
 
             for x in range(1, 10):

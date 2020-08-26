@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 import re
 import sys
@@ -24,63 +23,15 @@ from help.tools import get_proxy_ip, wirteLog, get_mobileconfig_url
 
 if __name__ == '__main__':
 
-    
-    # os.system('D:\\python381\\python.exe .\\doupoclub_com.py')
-    # os.system('D:\\python381\\python.exe .\\iosvipsign_site.py')
-    # os.system('D:\\python381\\python.exe .\\www_86scw_com.py')
-    # os.system('D:\\python381\\python.exe .\\ios_tkls365_com.py')
-    # headers = {'Cache-Control': 'no-cache'}
-    # url = 'http://http.tiqu.qingjuhe.cn/getip?num=1&type=1&pack=53362&port=11&lb=1&pb=45&regions='
-    # get_ip = requests.get(url, headers).text.strip()
-    # print(get_ip)
 
-    # x = [20, 40, 60, 80, 100, 120, 140]
-
-    # y = [44.50, 75.65, 103.05, 138.35, 168.20, 187.30, 210.85]
-
-    # parameters = np.polyfit(x, y, 1)
-
-    # func = np.poly1d(parameters)
-    # print(parameters)
-    # plt.scatter(x, y)                      # print the original numbers in dots
-    # x = [0] + x + [160]
-    # plt.grid(True, color='gray')
-    # plt.plot(x, func(x), color='orange', linestyle = '--')
-    # plt.xlim(0, 160)
-    # plt.ylim(0, 300)
-    # plt.xlabel('W (Kg)')
-    # plt.ylabel('F (N)')
-    # plt.show()
+    xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
+    print(xml)
 
 
-
-    # st = 'position: fixed;width: 359px;height: 359px;top: 227px;left: 6px;border: 1px solid rgb(229, 229, 229);border-radius: 3px;'
-
-    # result = re.compile(r'(?<=: )(\d+)(?=px;)').findall(st)
-    # print(result)
-
-    # split_str = st.split(";")
-    # for x in split_str:
-    #     print(x.split(":"))
-    # print(split_str.split)
-
-    # slideImg = cv2.imread('..\\file\\bg.jpg')
-    # bgImg = cv2.imread('..\\file\\front.jpg')
-
-    # result = cv2.matchTemplate(slideImg, bgImg, cv2.TM_CCOEFF_NORMED)
-    # y, x = np.unravel_index(result.argmax(), result.shape)
-    # print(y,x)
-    # xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
-    # print(xml)
-
-
-    #             udid_dit = re.compile(r'(?<=<key>UDID</key><string>)(.*?)(?=</string>)').findall(config_dit['xml'])
-
-    #         loading_page_url = 'https://down.8iosapp.com/5KZD.app?udid=' + udid_dit[0]
-    # print(xml)
     # proxy_ip = get_proxy_ip()
+    # print(proxy_ip)
 
-    # post_url = 'https://www.wnphb.com/download/report/azRQ'
+    # post_url = 'https://www.xbai.app/oCsmuH/getudid/'
 
     # proxies = {"https": 'https://' + proxy_ip}
     # headers = {'Content-Type': 'application/xml'}
@@ -89,11 +40,40 @@ if __name__ == '__main__':
     # print('发送XML响应URL', response.url)
 
     # print(xml)
-
-    # url = 'https://iosvipsign.site/install/798-75?appenddata=%7B%22ChannelInfo%22%3A%22%7C%7C798%7Chttps%3A%2F%2F369vk.com%2F%7C1597717571446%7Cf5705def7c6ada08c3f521c625971617%22%2C%22test%22%3A%22hello%22%7D'
-    # par = urllib.parse.urlparse(url)
+    # par = urllib.parse.urlparse(response.url)
     # query = urllib.parse.parse_qs(par.query)
     # print(query)
 
+    # data = {
+    #     'query': query['query'][0],
+    #     'hash': ''
+    # }
+
+    # headers1 = {
+    #     'accept': 'application/json, text/javascript, */*; q=0.01',
+    #     'accept-encoding': 'gzip, deflate, br',
+    #     'accept-language': 'zh-CN,zh;q=0.9',
+    #     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    #     'origin': 'https://www.syt0351.com',
+    #     'referer': response.url,
+    #     'sec-fetch-dest': 'empty',
+    #     'sec-fetch-mode': 'cors',
+    #     'sec-fetch-site': 'same-origin',
+    #     'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+    #     'x-requested-with': 'XMLHttpRequest',
+    # }
+
+
+
+    # response1 = requests.post('https://www.syt0351.com/oCsmuH/goapp', data=data, headers=headers1, proxies=proxies)
+
+    # print('响应URL状态', response1.status_code)
+    # print('响应URL', response1.url)
+
+    # content = json.loads(response1.content)
+    # print('响应内容', response1.content)
+    # print(json)
+
+    # wirteLog(response1.content)
     # mobileconfig_url = get_mobileconfig_url('./111.mobileconfig')
     # print(mobileconfig_url)

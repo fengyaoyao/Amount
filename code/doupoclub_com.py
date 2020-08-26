@@ -27,6 +27,10 @@ def get_sign(q1):
         {'url': 'https://doupoclub.com/receive/5ee2126bd1ca6','ischeck': ['5ee2126bd1ca6', 'true']},
         {'url': 'https://doupoclub.com/receive/5efdc065c1bdc','ischeck': ['5efdc065c1bdc', 'true']},
         {'url': 'https://doupoclub.com/receive/5ee36de675aa3','ischeck': ['5ee36de675aa3', 'true']},
+        {'url': 'https://doupoclub.com/receive/5efb502309ffd','ischeck': ['5efb502309ffd', 'true']},
+        {'url': 'https://doupoclub.com/receive/5ee4a69545a95','ischeck': ['5ee4a69545a95', 'true']},
+        {'url': 'https://doupoclub.com/receive/5efcc0cedd73b','ischeck': ['5efcc0cedd73b', 'true']},
+
     ])
 
     if config['proxy_ip'] == False or config['xml'] == False:
@@ -162,10 +166,9 @@ def get_download_manifest_plist_url(q2):
         # 'Connection': 'close'
     }
 
-    for request in range(1, 100):
+    for request in range(1, 120):
 
-        download_status_url = 'https://doupoclub.com/progrees/' + \
-            queue2_config['downloadId']
+        download_status_url = 'https://doupoclub.com/progrees/' + queue2_config['downloadId']
 
         try:
             #  timeout=(6.05, 27.05)
@@ -200,19 +203,19 @@ if __name__ == '__main__':
     q1 = queue.Queue()
     q2 = queue.Queue()
 
-    for y in range(1, 5):
+    for y in range(1, 10):
         t1 = threading.Thread(target=get_sign, args=(q1,))
         t1.start()
         t1.join()
         sleep(1)
 
-    for y in range(1, 5):
+    for y in range(1, 10):
         t2 = threading.Thread(target=get_downloadId, args=(q1, q2,))
         t2.start()
         t2.join()
         sleep(0.5)
 
-    for z in range(1, 5):
+    for z in range(1, 10):
         t3 = threading.Thread(
             target=get_download_manifest_plist_url, args=(q2,))
         t3.start()
