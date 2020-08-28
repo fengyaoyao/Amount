@@ -27,9 +27,9 @@ if __name__ == '__main__':
 
 
 	scheduler = BlockingScheduler()
-	scheduler.add_job(doupoclub_com, 'interval', minutes=10,start_date='2020-08-26 14:13:00', end_date='2020-08-26 17:30:00',max_instances=3)
-	scheduler.add_job(iosvipsign_site, 'interval', minutes=8,start_date='2020-08-26 14:13:00', end_date='2020-08-26 17:30:00',max_instances=3)
-	scheduler.add_job(www_86scw_com, 'interval', minutes=6,start_date='2020-08-26 14:13:00', end_date='2020-08-26 17:30:00',max_instances=3)
-	scheduler.add_job(ios_tkls365_com, 'interval', minutes=5,start_date='2020-08-26 14:13:00', end_date='2020-08-26 17:30:00',max_instances=1)
+	scheduler.add_job(doupoclub_com, 'interval', minutes=10,start_date='2020-08-28 10:55:00', end_date='2020-08-28 17:30:00',max_instances=3)
+	scheduler.add_job(iosvipsign_site, 'interval', minutes=8,start_date='2020-08-28 10:55:00', end_date='2020-08-28 17:30:00',max_instances=3)
+	scheduler.add_job(www_86scw_com, 'interval', minutes=6,start_date='2020-08-28 10:55:00', end_date='2020-08-28 17:30:00',max_instances=3)
+	scheduler.add_job(ios_tkls365_com, 'interval', minutes=5,start_date='2020-08-28 10:55:00', end_date='2020-08-28 17:30:00',max_instances=1)
 	scheduler.start()
 

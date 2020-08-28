@@ -10,13 +10,13 @@ def show(name):
 	cv2.destroyAllWindows()
  
 def main():
-	otemp = '../file/front.jpg'
-	oblk = '../file/bg.jpg'
+	otemp = '../file/hycdn2.png'
+	oblk = '../file/hycdn.jpg'
 	target = cv2.imread(otemp, 0)
 	template = cv2.imread(oblk, 0)
 	w, h = target.shape[::-1]
-	temp = 'temp.jpg'
-	targ = 'targ.jpg'
+	temp = '../file/temp.jpg'
+	targ = '../file/targ.jpg'
 	cv2.imwrite(temp, template)
 	cv2.imwrite(targ, target)
 	target = cv2.imread(targ)
@@ -24,6 +24,8 @@ def main():
 	target = abs(255 - target)
 	cv2.imwrite(targ, target)
 	target = cv2.imread(targ)
+	# print(target)
+	# exit()
 	template = cv2.imread(temp)
 	result = cv2.matchTemplate(target, template, cv2.TM_CCOEFF_NORMED)
 	x, y = np.unravel_index(result.argmax(), result.shape)

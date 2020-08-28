@@ -23,21 +23,32 @@ from help.tools import get_proxy_ip, wirteLog, get_mobileconfig_url
 
 if __name__ == '__main__':
 
+    
 
     xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
     print(xml)
 
 
-    # proxy_ip = get_proxy_ip()
-    # print(proxy_ip)
+    proxy_ip = get_proxy_ip()
+    print(proxy_ip)
 
-    # post_url = 'https://www.xbai.app/oCsmuH/getudid/'
+    post_url = 'https://ios588.com/source/index/receive.php/awgda7'
 
-    # proxies = {"https": 'https://' + proxy_ip}
-    # headers = {'Content-Type': 'application/xml'}
-    # response = requests.post(post_url, data=xml, headers=headers, proxies=proxies)
-    # print('发送XML响应URL状态', response.status_code)
-    # print('发送XML响应URL', response.url)
+    proxies = {"https": 'https://' + proxy_ip}
+    headers = {'Content-Type': 'application/xml'}
+    response = requests.post(post_url, data=xml, headers=headers, proxies=proxies)
+    print('发送XML响应URL状态', response.status_code)
+    print('发送XML响应URL', response.url)
+
+
+    response = requests.get(post_url, data=xml, headers=headers, proxies=proxies)
+    par = urllib.parse.urlparse(response.url)
+    query = urllib.parse.parse_qs(par.query)
+    print(query)
+
+    # http://jb9ee76dylnjecnzuouxi8xuwjeauy8se9wkjyj2k9cd7kv3xv.url.ios588.com/source/index/ajax_vipsign.php?in_id=MDAwMDAwMDAwMIKqyJY&udid=6c451c46fb03bece9183bc7b9855b386637e75e6&ac=checkvipsign&knameid=
+
+    # z-index: 99999; display: none;
 
     # print(xml)
     # par = urllib.parse.urlparse(response.url)

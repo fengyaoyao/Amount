@@ -18,6 +18,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 sys.path.append('../')
 from help.config import config_data
 from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_ip, get_dir, set_flow,get_system
@@ -27,9 +28,9 @@ from help.tools import find_file, delete_path, get_mobileconfig_url, get_proxy_i
 def get_img(driver):
 
     try:
-        WebDriverWait(driver, 60, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="cdn1"]')))
-        WebDriverWait(driver, 60, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="cdn2"]')))
-        WebDriverWait(driver, 60, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_drag_button"]')))
+        WebDriverWait(driver, 80, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="cdn1"]')))
+        WebDriverWait(driver, 80, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="cdn2"]')))
+        WebDriverWait(driver, 80, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_drag_button"]')))
 
 
         # 获取滑动块的当前初始化位置
@@ -89,8 +90,8 @@ def move_to(driver):
 
             print('xoffset',xoffset)
 
-            WebDriverWait(driver, 60, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_drag_button"]')))
-            WebDriverWait(driver, 60, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_note"]')))
+            WebDriverWait(driver, 80, 1).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_drag_button"]')))
+            WebDriverWait(driver, 80, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_note"]')))
 
             div = driver.find_element_by_xpath('//*[@id="tcaptcha_drag_button"]')
             ActionChains(driver).drag_and_drop_by_offset(div,xoffset=xoffset ,yoffset=0).perform()
@@ -131,12 +132,11 @@ def run():
             proxy_ip = config_dit['proxy_ip']
             print('代理IP', proxy_ip)
             print(config_dit)
-            mobileEmulation = {'deviceName': config_dit['deviceName']}
+            mobileEmulation = {'deviceName': 'iPhone 6/7/8'}
             prefs = {'download.default_directory': download_file,
                      'download.prompt_for_download': False}
-
             chrome_options = webdriver.ChromeOptions()
-            # chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--headless')
             chrome_options.add_argument("--proxy-server=http://" + proxy_ip)
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--disable-gpu')
@@ -159,7 +159,11 @@ def run():
 
             print(loading_page_url)
             driver.get(loading_page_url)
-
+            # # # 获取窗口大小
+            # print(driver.get_window_size())
+            # # 获取请求的 userAgent
+            # agent = driver.execute_script("return navigator.userAgent")    
+            # print(agent)
             try:
                 WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="tcaptcha_iframe"]')))
                 iframe = driver.find_element_by_id("tcaptcha_iframe")
@@ -170,26 +174,7 @@ def run():
                 return None
 
             sleep(3)
-            # driver.execute_script("function startReq(ticket,randStr) {localStorage.setItem('ticket', ticket);localStorage.setItem('randstr', randstr);}")
             move_to(driver)
-            # for x in range(1,50):
-            # downloadId = driver.execute_script("return window.localStorage.getItem('downloadId');")
-            # print('downloadId',downloadId)
-            #     sleep(1)
-            # try:
-            #     for x in range(1,10):
-            #         tcaptcha_note = driver.find_element_by_xpath('//*[@id="tcaptcha_note"]').text
-            #         if len(tcaptcha_note) > 0:
-            #             break
-            #         sleep(1)
-
-            #     print('tcaptcha_note',tcaptcha_note)
-            #     if tcaptcha_note == '这题有点难呢，已为您更换题目':
-            #         move_to(driver)
-            # except Exception as e:
-            #     print('错误信息提示：%s' % e)
-
-
             driver.switch_to.parent_frame()
             for x in range(1,80):
                 text = driver.find_element_by_xpath('//*[@id="xzzz"]').text
