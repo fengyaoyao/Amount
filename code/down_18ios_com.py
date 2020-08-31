@@ -140,6 +140,11 @@ def run():
             chrome_options.add_argument("--proxy-server=http://" + proxy_ip)
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--disable-gpu')
+            
+            if platform.system() != 'Windows':
+                chrome_options.add_argument('--no-sandbox')
+                chrome_options.add_argument('--disable-dev-shm-usage')
+                
             chrome_options.add_argument('--safebrowsing-disable-download-protection')
             chrome_options.add_argument("--safebrowsing-disable-extension-blacklist")
             chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)

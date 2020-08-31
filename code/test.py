@@ -14,24 +14,17 @@ import urllib.parse
 import matplotlib.pyplot as plt
 import cv2
 from selenium import webdriver
-
-
-if platform.system() == 'Windows':
-    sys.path.append('..\\')
-else:
-    sys.path.append('../')
-
+sys.path.append('../')
 from help.config import config_data
 from help.tools import get_proxy_ip, wirteLog, get_mobileconfig_url
 
 
 if __name__ == '__main__':
 
-    
-
+    print(platform.system())
+    exit()
     xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
     print(xml)
-
 
     proxy_ip = get_proxy_ip()
     print(proxy_ip)
@@ -43,7 +36,6 @@ if __name__ == '__main__':
     response = requests.post(post_url, data=xml, headers=headers, proxies=proxies)
     print('发送XML响应URL状态', response.status_code)
     print('发送XML响应URL', response.url)
-
 
     response = requests.get(post_url, data=xml, headers=headers, proxies=proxies)
     par = urllib.parse.urlparse(response.url)

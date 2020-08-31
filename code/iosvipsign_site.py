@@ -49,15 +49,16 @@ def run():
             chrome_options.add_argument("--proxy-server=http://" + proxy_ip)
             chrome_options.add_argument('--ignore-certificate-errors')
             chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument(
-                '--safebrowsing-disable-download-protection')
-            chrome_options.add_argument(
-                "--safebrowsing-disable-extension-blacklist")
-            chrome_options.add_experimental_option(
-                'mobileEmulation', mobileEmulation)
+
+            if platform.system() == 'Linux':
+                chrome_options.add_argument('--no-sandbox')
+                chrome_options.add_argument('--disable-dev-shm-usage')
+
+            chrome_options.add_argument('--safebrowsing-disable-download-protection')
+            chrome_options.add_argument('--safebrowsing-disable-extension-blacklist')
+            chrome_options.add_experimental_option('mobileEmulation', mobileEmulation)
             chrome_options.add_experimental_option('prefs', prefs)
-            chrome_options.add_experimental_option(
-                'excludeSwitches', ['enable-logging', 'enable-automation'])
+            chrome_options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
             driver = webdriver.Chrome(options=chrome_options)
 
             driver.command_executor._commands["send_command"] = (
