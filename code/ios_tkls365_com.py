@@ -64,8 +64,8 @@ def runs():
                 driver.set_page_load_timeout(30)
                 driver.get(loading_page_url)
                 driver.implicitly_wait(2)
-                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[1]/div[2]/div[2]/div')))
-                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="j-install-ipa"]')))
+                WebDriverWait(driver, 60, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[1]/div[2]/div[2]/div')))
+                WebDriverWait(driver, 60, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="j-install-ipa"]')))
             except (Exception, NameError, NoSuchElementException,TimeoutException, ConnectionRefusedError, urllib3.exceptions.NewConnectionError) as e:
                 print('错误信息提示：%s' % e)
                 driver.quit()
@@ -88,6 +88,6 @@ def runThread():
         sleep(2)
     
 if __name__ == '__main__':
-    
+    runs()
     # runThread()
-    print('pass')
+    # print('pass')

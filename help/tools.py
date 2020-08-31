@@ -50,7 +50,7 @@ def get_proxy_ip():
 
         result_str = json.loads(get_ip)
 
-        if result_str['code'] == 121:
+        if result_str['code'] == '121':
             
             print(result_str['msg'])
             exit()
@@ -59,8 +59,7 @@ def get_proxy_ip():
             sleep(1.5)
             get_ip = requests.get(url, headers).text.strip()
 
-    
-        elif len(result_str['msg']) > 1:
+        elif result_str['code'] == '113' and len(result_str['msg']) > 1:
             myip = re.findall(r'[0-9]+(?:\.[0-9]+){3}', result_str['msg'])[0]
             white_proxy_url = 'http://ty-http-d.upupfile.com/index/white/add?neek=tyhttp487901&appkey=3e096aec1eecdba33d44249454053a07&white='
             response = requests.get(white_proxy_url + myip, headers).text

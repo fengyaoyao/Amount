@@ -15,7 +15,11 @@ import matplotlib.pyplot as plt
 import cv2
 from selenium import webdriver
 
-sys.path.append('..\\')
+
+if platform.system() == 'Windows':
+    sys.path.append('..\\')
+else:
+    sys.path.append('../')
 
 from help.config import config_data
 from help.tools import get_proxy_ip, wirteLog, get_mobileconfig_url
