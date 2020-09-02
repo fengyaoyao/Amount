@@ -21,15 +21,20 @@ from help.tools import get_proxy_ip, wirteLog, get_mobileconfig_url
 
 if __name__ == '__main__':
 
-    print(platform.system())
+
+    mobileconfig = 'http://www.86scw.com/source/sign/install/getudid.php?id=646V563Z6F6W465G313G730'
+    post_url = mobileconfig.replace('getudid','receive').replace('http','https')
+    # post_url = post_url.replace('http','https')
+    print(post_url)
     exit()
+
     xml = requests.get('http://104.243.25.81/web/user/getUdidXml').text
     print(xml)
-
+    # exit()
     proxy_ip = get_proxy_ip()
     print(proxy_ip)
 
-    post_url = 'https://ios588.com/source/index/receive.php/awgda7'
+    post_url = 'https://www.86scw.com/source/sign/install/receive.php?id=646856336F6D46563137730'
 
     proxies = {"https": 'https://' + proxy_ip}
     headers = {'Content-Type': 'application/xml'}

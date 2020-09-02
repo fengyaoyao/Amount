@@ -14,6 +14,9 @@ def main():
 	oblk = '../file/hycdn.jpg'
 	target = cv2.imread(otemp, 0)
 	template = cv2.imread(oblk, 0)
+	print(template[90:100,495:588])
+	show(template[90:100,495:588])
+	exit()
 	w, h = target.shape[::-1]
 	temp = '../file/temp.jpg'
 	targ = '../file/targ.jpg'
@@ -21,6 +24,7 @@ def main():
 	cv2.imwrite(targ, target)
 	target = cv2.imread(targ)
 	target = cv2.cvtColor(target, cv2.COLOR_BGR2GRAY)
+
 	target = abs(255 - target)
 	cv2.imwrite(targ, target)
 	target = cv2.imread(targ)

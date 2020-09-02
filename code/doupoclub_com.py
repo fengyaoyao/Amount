@@ -166,7 +166,7 @@ def get_download_manifest_plist_url(q2):
         # 'Connection': 'close'
     }
 
-    for request in range(1, 120):
+    for request in range(1, 160):
 
         download_status_url = 'https://doupoclub.com/progrees/' + queue2_config['downloadId']
 

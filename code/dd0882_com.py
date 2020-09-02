@@ -22,12 +22,7 @@ def run():
 
     try:
 
-        config_dit = config_data([
-            {'url': 'https://798-1.com/79l-won-cfk/',
-                'click': '/html/body/div[1]/div[1]/div[1]/a[2]', 'install': '//*[@id="install-btn"]'},
-            {'url': 'https://369vk.com',
-                'click': '/html/body/div/div[2]/div/a[2]', 'install': '//*[@id="install-btn"]'},
-        ])
+        config_dit = config_data([{'url': 'https://dd0882.com/jk-asf-296/','click': '/html/body/div/div[2]/div/a[2]/img', 'install': '/html/body/div[2]/div/div[1]/div[2]/div[2]/div'}])
 
         if config_dit['proxy_ip'] != False and config_dit['xml'] != False:
 
@@ -61,76 +56,44 @@ def run():
             chrome_options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
             driver = webdriver.Chrome(options=chrome_options)
 
-            driver.command_executor._commands["send_command"] = (
-                "POST", '/session/$sessionId/chromium/send_command')
-            params = {'cmd': 'Page.setDownloadBehavior', 'params': {
-                'behavior': 'allow', 'downloadPath': download_file}}
+            driver.command_executor._commands["send_command"] = ("POST", '/session/$sessionId/chromium/send_command')
+            params = {'cmd': 'Page.setDownloadBehavior', 'params': {'behavior': 'allow', 'downloadPath': download_file}}
             driver.execute("send_command", params)
 
             driver.get(config_dit['url'])
 
-            try:
-                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, config_dit['click']))).click()
-                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, config_dit['install']))).click()
-            except (Exception, NameError, ConnectionRefusedError, urllib3.exceptions.NewConnectionError) as e:
-                print('错误信息提示：%s' % e)
-                driver.quit()
-                return None
-
-            sleep(1)
-            cookie = driver.get_cookie('ios_vip_sign_session')
-
-            for x in range(1, 10):
-                download_file_name = find_file(download_file)
-                if download_file_name:
-                    break
-                sleep(1)
-
-            post_url = None
-            if download_file_name:
-
-                if get_system() == 'Windows':
-                    path_mobileconfig = download_file + '\\' + download_file_name
-                else:
-                    path_mobileconfig = download_file + '/' + download_file_name
-
-                mobileconfig_url = get_mobileconfig_url(path_mobileconfig)
-                post_url = mobileconfig_url[0]
-
-            print('当前页面URL地址:', driver.current_url)
-            print('Cookie:', cookie)
+            WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, config_dit['click']))).click()
+            WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="mobileconfig"]')))
+            mobileconfig = driver.find_element_by_xpath('//*[@id="mobileconfig"]').get_attribute('value')
+            post_url = mobileconfig.replace('getudid','receive').replace('http','https')
             print('配置文件链接:', post_url)
 
             if post_url is not None:
 
                 proxies = {"https": 'https://' + proxy_ip}
                 headers = {'Content-Type': 'application/xml'}
-                response = requests.post(post_url, data=config_dit[
-                                         'xml'], headers=headers, proxies=proxies)
+                response = requests.post(post_url, data=config_dit['xml'], headers=headers, proxies=proxies)
                 print('发送XML响应URL状态', response.status_code)
                 print('发送XML响应URL', response.url)
                 driver.get(response.url)
+
                 driver.implicitly_wait(2)
+                WebDriverWait(driver, 30, 0.5).until(EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div[1]/div[2]/div[2]/div/div[1]')))
 
-                status = True
-                while status:
-                    text = driver.find_element_by_xpath(
-                        config_dit['install']).text
-                    print(text)
-                    if text == '再试一次':
+                for x in range(1,100):
+                    text = driver.find_element_by_xpath('//*[@id="app"]/div/div[1]/div[2]/div[2]/div/div[1]').text
+                    print('安装动作:',text)
+                    if text == '返回桌面查看':
+                        wirteLog({'配置文件的链接:': post_url, '响应地址:': response.url, '安装动作:': text})
                         break
-                    if text == '网络错误':
-                        break
-                    if text == '正在下载中...':
-
-                        wirteLog(text)
-                        status = False
+                    if text == '刷新重试!':
                         break
                     sleep(1)
+
             driver.quit()
 
     except (BaseException, Exception, ConnectionResetError, TypeError) as e:
-        print('错误信息提示：%s' % e)
+        print('错误信息提示2：%s' % e)
 
 
 def runThread():
@@ -143,3 +106,4 @@ def runThread():
 
 if __name__ == '__main__':
     runThread()
+    # run()
